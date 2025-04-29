@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -488,3 +491,499 @@
     </script>
 </body>
 </html>
+</head>
+<body>
+    <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 汉字字卡</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f9ff;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #1565c0;
+            margin-bottom: 20px;
+        }
+        .mode-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .mode-btn {
+            padding: 10px 25px;
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            border: 2px solid #90caf9;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .mode-btn.active {
+            background-color: #42a5f5;
+            color: white;
+            border-color: #1e88e5;
+        }
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #42a5f5;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background-color: #1e88e5;
+            transform: translateY(-2px);
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            width: 100px;
+            height: 140px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .card-front {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #0d47a1;
+            border: 3px solid #64b5f6;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .card-back {
+            background: linear-gradient(135deg, #fff9c4, #fff59d);
+            color: #f57f17;
+            transform: rotateY(180deg);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .card-back-english {
+            background: linear-gradient(135deg, #dcedc8, #c5e1a5);
+            color: #33691e;
+            transform: rotateY(180deg);
+            font-size: 1rem;
+            padding: 15px;
+            text-align: center;
+        }
+        .level-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #5c6bc0;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .pinyin {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: #d84315;
+        }
+        .meaning {
+            font-size: 0.9rem;
+            color: #5d4037;
+            text-align: center;
+            padding: 0 5px;
+        }
+        @media (max-width: 600px) {
+            .card {
+                width: 80px;
+                height: 120px;
+            }
+            .card-front {
+                font-size: 2rem;
+            }
+            .card-back {
+                font-size: 1rem;
+            }
+            .pinyin {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>MT 汉字字卡 (Level 1)</h1>
+    
+    <div class="mode-controls">
+        <button id="hanzi-mode" class="mode-btn active">汉字模式</button>
+        <button id="pinyin-mode" class="mode-btn">读音模式</button>
+    </div>
+    
+    <div class="controls">
+        <button id="shuffle-btn">🔀 打乱顺序</button>
+        <button id="flip-all">🔄 全部翻转</button>
+        <button id="reset-btn">🔄 重置卡片</button>
+    </div>
+    
+    <div class="container" id="cards-container">
+        <!-- 卡片将通过JavaScript动态生成 -->
+    </div>
+
+    <script>
+        // 汉字数据 (Level 1 & 2)
+        const hanziData = [
+            // Level 1
+            { hanzi: "女", pinyin: "nǚ", meaning: "female", level: "1" },
+            { hanzi: "子", pinyin: "zǐ", meaning: "child", level: "1" },
+            { hanzi: "儿", pinyin: "ér", meaning: "son", level: "1" },
+            { hanzi: "了", pinyin: "le", meaning: "completed action marker", level: "1" },
+            { hanzi: "好", pinyin: "hǎo", meaning: "good", level: "1" },
+            { hanzi: "大", pinyin: "dà", meaning: "big", level: "1" },
+            { hanzi: "小", pinyin: "xiǎo", meaning: "small", level: "1" },
+            { hanzi: "少", pinyin: "shǎo", meaning: "few", level: "1" },
+            { hanzi: "上", pinyin: "shàng", meaning: "up; on", level: "1" },
+            { hanzi: "下", pinyin: "xià", meaning: "down; next", level: "1" },
+            { hanzi: "太", pinyin: "tài", meaning: "too", level: "1" },
+            { hanzi: "中", pinyin: "zhōng", meaning: "middle", level: "1" },
+            { hanzi: "天", pinyin: "tiān", meaning: "day; sky", level: "1" },
+            { hanzi: "生", pinyin: "shēng", meaning: "life; be born", level: "1" },
+            { hanzi: "也", pinyin: "yě", meaning: "also", level: "1" },
+            { hanzi: "门", pinyin: "mén", meaning: "door", level: "1" },
+            { hanzi: "她", pinyin: "tā", meaning: "she", level: "1" },
+            { hanzi: "他", pinyin: "tā", meaning: "he", level: "1" },
+            { hanzi: "你", pinyin: "nǐ", meaning: "you", level: "1" },
+            { hanzi: "们", pinyin: "men", meaning: "plural marker", level: "1" },
+            { hanzi: "位", pinyin: "wèi", meaning: "polite measure word for people", level: "1" },
+            { hanzi: "什", pinyin: "shén", meaning: "what", level: "1" },
+            { hanzi: "住", pinyin: "zhù", meaning: "live", level: "1" },
+            { hanzi: "口", pinyin: "kǒu", meaning: "mouth", level: "1" },
+            { hanzi: "日", pinyin: "rì", meaning: "day; sun", level: "1" },
+            { hanzi: "目", pinyin: "mù", meaning: "eye", level: "1" },
+            { hanzi: "寸", pinyin: "cùn", meaning: "inch", level: "1" },
+            { hanzi: "不", pinyin: "bù", meaning: "not", level: "1" },
+            { hanzi: "么", pinyin: "me", meaning: "question particle", level: "1" },
+            { hanzi: "个", pinyin: "gè", meaning: "general measure word", level: "1" },
+            { hanzi: "时", pinyin: "shí", meaning: "time", level: "1" },
+            { hanzi: "间", pinyin: "jiān", meaning: "between", level: "1" },
+            { hanzi: "星", pinyin: "xīng", meaning: "star", level: "1" },
+            { hanzi: "是", pinyin: "shì", meaning: "be", level: "1" },
+            { hanzi: "晴", pinyin: "qíng", meaning: "sunny", level: "1" },
+            { hanzi: "晚", pinyin: "wǎn", meaning: "evening", level: "1" },
+            { hanzi: "看", pinyin: "kàn", meaning: "look; watch", level: "1" },
+            { hanzi: "几", pinyin: "jǐ", meaning: "how many", level: "1" },
+            { hanzi: "木", pinyin: "mù", meaning: "wood", level: "1" },
+            { hanzi: "本", pinyin: "běn", meaning: "measure word for books", level: "1" },
+            { hanzi: "飞", pinyin: "fēi", meaning: "fly", level: "1" },
+            { hanzi: "手", pinyin: "shǒu", meaning: "hand", level: "1" },
+            { hanzi: "米", pinyin: "mǐ", meaning: "rice", level: "1" },
+            { hanzi: "衣", pinyin: "yī", meaning: "clothes", level: "1" },
+            { hanzi: "的", pinyin: "de", meaning: "possessive particle", level: "1" },
+            { hanzi: "来", pinyin: "lái", meaning: "come", level: "1" },
+            { hanzi: "朋", pinyin: "péng", meaning: "friend", level: "1" },
+            { hanzi: "脑", pinyin: "nǎo", meaning: "brain", level: "1" },
+            { hanzi: "期", pinyin: "qī", meaning: "period", level: "1" },
+            { hanzi: "多", pinyin: "duō", meaning: "many", level: "1" },
+            { hanzi: "有", pinyin: "yǒu", meaning: "have", level: "1" },
+            { hanzi: "服", pinyin: "fú", meaning: "clothes", level: "1" },
+            { hanzi: "现", pinyin: "xiàn", meaning: "now", level: "1" },
+            { hanzi: "用", pinyin: "yòng", meaning: "use", level: "1" },
+            { hanzi: "去", pinyin: "qù", meaning: "go", level: "1" },
+            { hanzi: "在", pinyin: "zài", meaning: "at; in", level: "1" },
+            { hanzi: "两", pinyin: "liǎng", meaning: "two (for things)", level: "1" },
+            { hanzi: "长", pinyin: "cháng", meaning: "long", level: "1" },
+            { hanzi: "东", pinyin: "dōng", meaning: "east", level: "1" },
+            { hanzi: "西", pinyin: "xī", meaning: "west", level: "1" },
+            { hanzi: "这", pinyin: "zhè", meaning: "this", level: "1" },
+            { hanzi: "还", pinyin: "hái", meaning: "still", level: "1" },
+            { hanzi: "过", pinyin: "guò", meaning: "past experience", level: "1" },
+            { hanzi: "边", pinyin: "biān", meaning: "side", level: "1" },
+            { hanzi: "道", pinyin: "dào", meaning: "road", level: "1" },
+            { hanzi: "块", pinyin: "kuài", meaning: "piece; yuan", level: "1" },
+            { hanzi: "场", pinyin: "chǎng", meaning: "place", level: "1" },
+            { hanzi: "坐", pinyin: "zuò", meaning: "sit", level: "1" },
+            { hanzi: "要", pinyin: "yào", meaning: "want", level: "1" },
+            { hanzi: "共", pinyin: "gòng", meaning: "together", level: "1" },
+            { hanzi: "面", pinyin: "miàn", meaning: "face", level: "1" },
+            { hanzi: "半", pinyin: "bàn", meaning: "half", level: "1" },
+            { hanzi: "我", pinyin: "wǒ", meaning: "I", level: "1" },
+            { hanzi: "它", pinyin: "tā", meaning: "it", level: "1" },
+            { hanzi: "字", pinyin: "zì", meaning: "character", level: "1" },
+            { hanzi: "学", pinyin: "xué", meaning: "study", level: "1" },
+            { hanzi: "室", pinyin: "shì", meaning: "room", level: "1" },
+            { hanzi: "家", pinyin: "jiā", meaning: "home", level: "1" },
+            { hanzi: "完", pinyin: "wán", meaning: "finish", level: "1" },
+            { hanzi: "穿", pinyin: "chuān", meaning: "wear", level: "1" },
+            { hanzi: "客", pinyin: "kè", meaning: "guest", level: "1" },
+            { hanzi: "打", pinyin: "dǎ", meaning: "hit", level: "1" },
+            { hanzi: "找", pinyin: "zhǎo", meaning: "look for", level: "1" },
+            { hanzi: "挺", pinyin: "tǐng", meaning: "very", level: "1" },
+            { hanzi: "书", pinyin: "shū", meaning: "book", level: "1" },
+            { hanzi: "习", pinyin: "xí", meaning: "practice", level: "1" },
+            { hanzi: "叫", pinyin: "jiào", meaning: "call; be called", level: "1" },
+            { hanzi: "名", pinyin: "míng", meaning: "name", level: "1" },
+            { hanzi: "呢", pinyin: "ne", meaning: "question particle", level: "1" },
+            { hanzi: "吗", pinyin: "ma", meaning: "question particle", level: "1" },
+            { hanzi: "只", pinyin: "zhǐ", meaning: "only", level: "1" },
+            { hanzi: "号", pinyin: "hào", meaning: "number", level: "1" },
+            { hanzi: "知", pinyin: "zhī", meaning: "know", level: "1" },
+            { hanzi: "听", pinyin: "tīng", meaning: "listen", level: "1" },
+            { hanzi: "和", pinyin: "hé", meaning: "and", level: "1" },
+            { hanzi: "吧", pinyin: "ba", meaning: "particle indicating suggestion", level: "1" },
+            { hanzi: "问", pinyin: "wèn", meaning: "ask", level: "1" },
+            { hanzi: "吃", pinyin: "chī", meaning: "eat", level: "1" },
+            { hanzi: "喝", pinyin: "hē", meaning: "drink", level: "1" },
+            { hanzi: "电", pinyin: "diàn", meaning: "electricity", level: "1" },
+            { hanzi: "先", pinyin: "xiān", meaning: "first", level: "1" },
+            { hanzi: "当", pinyin: "dāng", meaning: "when", level: "1" },
+            { hanzi: "今", pinyin: "jīn", meaning: "today", level: "1" },
+            { hanzi: "年", pinyin: "nián", meaning: "year", level: "1" },
+            { hanzi: "对", pinyin: "duì", meaning: "correct", level: "1" },
+            { hanzi: "友", pinyin: "yǒu", meaning: "friend", level: "1" },
+            { hanzi: "汉", pinyin: "hàn", meaning: "Chinese", level: "1" },
+            { hanzi: "没", pinyin: "méi", meaning: "not", level: "1" },
+            { hanzi: "冷", pinyin: "lěng", meaning: "cold", level: "1" },
+            { hanzi: "杯", pinyin: "bēi", meaning: "cup", level: "1" },
+            { hanzi: "样", pinyin: "yàng", meaning: "appearance", level: "1" },
+            { hanzi: "果", pinyin: "guǒ", meaning: "fruit", level: "1" },
+            { hanzi: "桌", pinyin: "zhuō", meaning: "table", level: "1" },
+            { hanzi: "校", pinyin: "xiào", meaning: "school", level: "1" },
+            { hanzi: "机", pinyin: "jī", meaning: "machine", level: "1" },
+            { hanzi: "老", pinyin: "lǎo", meaning: "old", level: "1" },
+            { hanzi: "走", pinyin: "zǒu", meaning: "walk", level: "1" },
+            { hanzi: "发", pinyin: "fā", meaning: "send", level: "1" },
+            { hanzi: "公", pinyin: "gōng", meaning: "public", level: "1" },
+            { hanzi: "分", pinyin: "fēn", meaning: "minute; divide", level: "1" },
+            { hanzi: "会", pinyin: "huì", meaning: "can; meeting", level: "1" },
+            { hanzi: "做", pinyin: "zuò", meaning: "do", level: "1" },
+            { hanzi: "作", pinyin: "zuò", meaning: "work", level: "1" },
+            { hanzi: "候", pinyin: "hòu", meaning: "time", level: "1" },
+            { hanzi: "信", pinyin: "xìn", meaning: "letter", level: "1" },
+            { hanzi: "然", pinyin: "rán", meaning: "then", level: "1" },
+            { hanzi: "点", pinyin: "diǎn", meaning: "o'clock; dot", level: "1" },
+            { hanzi: "热", pinyin: "rè", meaning: "hot", level: "1" },
+            { hanzi: "起", pinyin: "qǐ", meaning: "rise", level: "1" },
+            { hanzi: "超", pinyin: "chāo", meaning: "exceed", level: "1" },
+            { hanzi: "雨", pinyin: "yǔ", meaning: "rain", level: "1" },
+            { hanzi: "美", pinyin: "měi", meaning: "beautiful", level: "1" },
+            { hanzi: "气", pinyin: "qì", meaning: "air", level: "1" },
+            { hanzi: "到", pinyin: "dào", meaning: "arrive", level: "1" },
+            { hanzi: "介", pinyin: "jiè", meaning: "introduce", level: "1" },
+            { hanzi: "以", pinyin: "yǐ", meaning: "with", level: "1" },
+            { hanzi: "前", pinyin: "qián", meaning: "before", level: "1" },
+            { hanzi: "后", pinyin: "hòu", meaning: "after", level: "1" },
+            { hanzi: "怎", pinyin: "zěn", meaning: "how", level: "1" },
+            { hanzi: "想", pinyin: "xiǎng", meaning: "want; think", level: "1" },
+            { hanzi: "雪", pinyin: "xuě", meaning: "snow", level: "1" },
+            { hanzi: "绍", pinyin: "shào", meaning: "introduce", level: "1" },
+            { hanzi: "国", pinyin: "guó", meaning: "country", level: "1" },
+            { hanzi: "店", pinyin: "diàn", meaning: "shop", level: "1" },
+            { hanzi: "医", pinyin: "yī", meaning: "doctor", level: "1" },
+            { hanzi: "些", pinyin: "xiē", meaning: "some", level: "1" },
+            { hanzi: "新", pinyin: "xīn", meaning: "new", level: "1" },
+            { hanzi: "所", pinyin: "suǒ", meaning: "place", level: "1" },
+            { hanzi: "关", pinyin: "guān", meaning: "close", level: "1" },
+            { hanzi: "系", pinyin: "xì", meaning: "system", level: "1" },
+            { hanzi: "马", pinyin: "mǎ", meaning: "horse", level: "1" },
+            { hanzi: "菜", pinyin: "cài", meaning: "vegetable", level: "1" },
+            { hanzi: "苹", pinyin: "píng", meaning: "apple", level: "1" },
+            { hanzi: "律", pinyin: "lǜ", meaning: "law", level: "1" },
+            { hanzi: "行", pinyin: "xíng", meaning: "go", level: "1" },
+            { hanzi: "很", pinyin: "hěn", meaning: "very", level: "1" },
+            { hanzi: "猫", pinyin: "māo", meaning: "cat", level: "1" },
+            { hanzi: "狗", pinyin: "gǒu", meaning: "dog", level: "1" },
+            { hanzi: "能", pinyin: "néng", meaning: "can", level: "1" },
+            { hanzi: "教", pinyin: "jiāo", meaning: "teach", level: "1" },
+            { hanzi: "真", pinyin: "zhēn", meaning: "really", level: "1" },
+            { hanzi: "度", pinyin: "dù", meaning: "degree", level: "1" },
+            { hanzi: "岁", pinyin: "suì", meaning: "year (of age)", level: "1" },
+            { hanzi: "钱", pinyin: "qián", meaning: "money", level: "1" },
+            { hanzi: "银", pinyin: "yín", meaning: "silver", level: "1" },
+            { hanzi: "饭", pinyin: "fàn", meaning: "meal", level: "1" },
+            { hanzi: "路", pinyin: "lù", meaning: "road", level: "1" },
+            { hanzi: "铁", pinyin: "tiě", meaning: "iron", level: "1" },
+            { hanzi: "写", pinyin: "xiě", meaning: "write", level: "1" },
+            { hanzi: "地", pinyin: "dì", meaning: "ground", level: "1" },
+            { hanzi: "错", pinyin: "cuò", meaning: "wrong", level: "1" },
+            { hanzi: "典", pinyin: "diǎn", meaning: "dictionary", level: "1" },
+            { hanzi: "累", pinyin: "lèi", meaning: "tired", level: "1" },
+            { hanzi: "买", pinyin: "mǎi", meaning: "buy", level: "1" },
+            { hanzi: "卖", pinyin: "mài", meaning: "sell", level: "1" },
+            { hanzi: "商", pinyin: "shāng", meaning: "business", level: "1" },
+            { hanzi: "爱", pinyin: "ài", meaning: "love", level: "1" },
+            { hanzi: "话", pinyin: "huà", meaning: "speech", level: "1" },
+            { hanzi: "说", pinyin: "shuō", meaning: "speak", level: "1" },
+            { hanzi: "课", pinyin: "kè", meaning: "class", level: "1" },
+            { hanzi: "谁", pinyin: "shéi", meaning: "who", level: "1" },
+            { hanzi: "请", pinyin: "qǐng", meaning: "please", level: "1" },
+            { hanzi: "认识", pinyin: "rèn shi", meaning: "know", level: "1" },
+            { hanzi: "语", pinyin: "yǔ", meaning: "language", level: "1" },
+            { hanzi: "读", pinyin: "dú", meaning: "read", level: "1" },
+            { hanzi: "谢", pinyin: "xiè", meaning: "thank", level: "1" },
+            { hanzi: "高兴", pinyin: "gāo xìng", meaning: "happy", level: "1" },
+            { hanzi: "事", pinyin: "shì", meaning: "matter", level: "1" },
+            { hanzi: "非常", pinyin: "fēi cháng", meaning: "very", level: "1" },
+            { hanzi: "喜欢", pinyin: "xǐ huan", meaning: "like", level: "1" },
+            { hanzi: "情", pinyin: "qíng", meaning: "feeling", level: "1" },
+            { hanzi: "快", pinyin: "kuài", meaning: "fast", level: "1" },
+            { hanzi: "忙", pinyin: "máng", meaning: "busy", level: "1" },
+            { hanzi: "院", pinyin: "yuàn", meaning: "courtyard", level: "1" },
+            { hanzi: "都", pinyin: "dōu", meaning: "all", level: "1" },
+            { hanzi: "转", pinyin: "zhuǎn", meaning: "turn", level: "1" },
+            { hanzi: "那", pinyin: "nà", meaning: "that", level: "1" },
+            { hanzi: "式", pinyin: "shì", meaning: "style", level: "1" },
+            { hanzi: "影", pinyin: "yǐng", meaning: "shadow", level: "1" },
+            { hanzi: "蛋糕", pinyin: "dàn gāo", meaning: "cake", level: "1" },
+            { hanzi: "意思", pinyin: "yì si", meaning: "meaning", level: "1" },
+            { hanzi: "咖啡", pinyin: "kā fēi", meaning: "coffee", level: "1" },
+            { hanzi: "息", pinyin: "xī", meaning: "rest", level: "1" },
+            { hanzi: "视", pinyin: "shì", meaning: "look", level: "1" },
+            { hanzi: "哪", pinyin: "nǎ", meaning: "which", level: "1" },
+            { hanzi: "喂", pinyin: "wèi", meaning: "hello (on phone)", level: "1" },
+        ];
+
+        let currentMode = 'hanzi'; // 默认汉字模式
+
+        // 初始化卡片
+        function initCards() {
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+            
+            hanziData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                if (currentMode === 'hanzi') {
+                    card.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-face card-front">${item.hanzi}</div>
+                            <div class="card-face card-back">
+                                <div class="level-badge">${item.level}</div>
+                                <div class="pinyin">${item.pinyin}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-face card-front">
+                                <div class="pinyin">${item.pinyin}</div>
+                            </div>
+                            <div class="card-face card-back-english">
+                                <div class="level-badge">${item.level}</div>
+                                <div class="meaning">${item.meaning}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                card.addEventListener('click', function() {
+                    this.classList.toggle('flipped');
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        // 打乱卡片顺序
+        function shuffleCards() {
+            const container = document.getElementById('cards-container');
+            const cards = Array.from(container.querySelectorAll('.card'));
+            
+            // 移除所有卡片
+            cards.forEach(card => container.removeChild(card));
+            
+            // 打乱顺序
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                container.appendChild(cards[j]);
+                cards.splice(j, 1);
+            }
+            
+            // 添加剩余的卡片
+            cards.forEach(card => container.appendChild(card));
+        }
+
+        // 翻转所有卡片
+        function flipAllCards() {
+            const cards = document.querySelectorAll('.card');
+            const allFlipped = Array.from(cards).every(card => card.classList.contains('flipped'));
+            
+            cards.forEach(card => {
+                if (allFlipped) {
+                    card.classList.remove('flipped');
+                } else {
+                    card.classList.add('flipped');
+                }
+            });
+        }
+
+        // 切换模式
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('hanzi-mode').classList.toggle('active', mode === 'hanzi');
+            document.getElementById('pinyin-mode').classList.toggle('active', mode === 'pinyin');
+            initCards();
+        }
+
+        // 事件监听
+        document.getElementById('shuffle-btn').addEventListener('click', shuffleCards);
+        document.getElementById('flip-all').addEventListener('click', flipAllCards);
+        document.getElementById('reset-btn').addEventListener('click', initCards);
+        document.getElementById('hanzi-mode').addEventListener('click', () => switchMode('hanzi'));
+        document.getElementById('pinyin-mode').addEventListener('click', () => switchMode('pinyin'));
+
+        // 初始化
+        initCards();
+    </script>
+</body>
+</html>
+</body>
+</html>
+
+
